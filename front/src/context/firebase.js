@@ -6,6 +6,7 @@ import {
   onAuthStateChanged,
   signInWithPopup,
 } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 if (app) {
   console.log("Firebase connected successfully!");
@@ -16,6 +17,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 export const FirebaseProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,9 +38,19 @@ export const FirebaseProvider = ({ children }) => {
       console.log("Issue while login with Google =>", e);
     }
   };
+  const generateToken = async () => {
+    if (auth.currentUser) {
+      const token = await auth.currentUser.getIdToken();
+      console.log("token:-", token);
+      return token;
+    } else {
+      alert("please login first");
+      navigate("/userlogin");
+    }
+  };
 
   return (
-    <FirebaseContext.Provider value={{ signinwithgoogle, user }}>
+    <FirebaseContext.Provider value={{ signinwithgoogle, user, generateToken }}>
       {!loading && children}
     </FirebaseContext.Provider>
   );

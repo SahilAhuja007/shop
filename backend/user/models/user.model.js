@@ -18,10 +18,12 @@ const userSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],
+      default: "pending",
     },
     access: {
       type: String,
-      enum: ["product management", "orders management"],
+      enum: ["product management", "orders management", "nothing"],
+      default: "nothing",
     },
     googleId: {
       type: String,
