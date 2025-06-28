@@ -8,7 +8,14 @@ const productSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: [""],
+      enum: [
+        "clothing",
+        "electronics",
+        "home",
+        "accessories",
+        "beauty",
+        "sports",
+      ],
       required: true,
     },
     price: {
@@ -25,6 +32,10 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     image: {
+      type: String,
+      required: true,
+    },
+    image_publicId: {
       type: String,
       required: true,
     },

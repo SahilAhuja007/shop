@@ -3,7 +3,7 @@ const {
   isFirstLogin,
   ApplicationForm,
 } = require("../controller/vendorController/auth");
-const verifyToken = require("../../middleware/verifyToken");
+const { verifyToken } = require("../../middleware/verifyToken");
 const vendorrouter = express.Router();
 
 vendorrouter.get("/isFirstLogin", verifyToken, isFirstLogin);
