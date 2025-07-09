@@ -48,3 +48,48 @@ exports.authorization = (...allowedRoles) => {
     }
   };
 };
+
+exports.adminvendorAccess = (requiredAccess) => {
+  return async (req, res, next) => {
+    try {
+      const user = req.user;
+      const existinguser = await User.findOne({ email: user.email });
+
+      if (!existinguser) {
+        return res
+          .status(400)
+          .json({ success: false, message: "User not found" });
+      }
+
+      if (existinguser.role === "admin") {
+        req.user = existinguser;
+        return next();
+      }
+
+      if (existinguser.role === "vendor") {
+        if (existinguser.access === requiredAccess) {
+          req.user = existinguser;
+          return next();
+        } else {
+          return res.status(403).json({
+            success: false,
+            message: `Access denied. You need "${requiredAccess}" permission. Contact admin.`,
+          });
+        }
+      }
+
+      return res.status(401).json({
+        success: false,
+        message:
+          "Access denied. This route is restricted to admin and vendors.",
+      });
+    } catch (error) {
+      console.log("Issue while checking access: ", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Server error while checking admin/vendor access",
+        data: error.message,
+      });
+    }
+  };
+};

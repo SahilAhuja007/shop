@@ -4,6 +4,7 @@ const {
   deleteCart,
   addProductInTheCart,
   deleteProductFromTheCart,
+  cartdetail,
 } = require("../controller/cart.controller");
 const { verifyToken, authorization } = require("../../middleware/verifyToken");
 const cartRouter = express.Router();
@@ -21,5 +22,11 @@ cartRouter.delete(
   verifyToken,
   authorization("user"),
   deleteProductFromTheCart
+);
+cartRouter.get(
+  "/getcartdetail",
+  verifyToken,
+  authorization("user"),
+  cartdetail
 );
 module.exports = cartRouter;

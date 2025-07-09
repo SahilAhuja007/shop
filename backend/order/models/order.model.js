@@ -11,6 +11,10 @@ const orderSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    totalItems: {
+      type: Number,
+      required: true,
+    },
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],
@@ -48,6 +52,15 @@ const orderSchema = mongoose.Schema(
         "delivered",
       ],
       default: "processing",
+    },
+    iscannecelled: {
+      type: String,
+      enum: ["yes", "no"],
+      default: "no",
+    },
+    whocancelled: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   { timestamps: true }

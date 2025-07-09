@@ -12,10 +12,16 @@ exports.createCart = async (req, res) => {
         .status(400)
         .json({ success: false, message: "cart is already created" });
     }
-    const newCart = await Cart.create({ user: user });
-    return res
-      .status(200)
-      .json({ success: true, message: "cart created successfully!" });
+    const newCart = await Cart.create({
+      user: user,
+      totalItems: 0,
+      totalPrice: 0,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "cart created successfully!",
+      data: newCart,
+    });
   } catch (error) {
     console.log("issue while creating cart =>", error.message);
     return res
@@ -188,6 +194,45 @@ exports.deleteProductFromTheCart = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Issue while deleting the product from the cart",
+      data: error.message,
+    });
+  }
+};
+
+exports.cartdetail = async (req, res) => {
+  try {
+    const user = req.user;
+    const cart = await Cart.findOne({ user: user._id });
+    if (!cart) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "cart is not present for this user so please create cart for this user",
+      });
+    }
+    const a = {};
+    const cartproducts = await CartProductLink.find({ cart: cart._id });
+
+    for (let product of cartproducts) {
+      const p = await Product.findById(product.product);
+      if (!p) {
+        product.deleteOne();
+      }
+    }
+    a = {
+      cart: cart,
+      products: cartproducts,
+    };
+    return res.status(200).json({
+      success: true,
+      message: "cart detail fetched successfully!",
+      data: a,
+    });
+  } catch (error) {
+    console.log("issue while fetching  cart detail :- ", error.message);
+    return res.status(500).json({
+      succcess: false,
+      message: "issue while fetching cart detail",
       data: error.message,
     });
   }
