@@ -1,34 +1,34 @@
-const Cart = require("../models/cart.moel");
+const Cart = require("../models/cart.model");
 const CartProductLink = require("../models/cartproductlink");
 const Product = require("../../product/models/product.model");
 
-exports.createCart = async (req, res) => {
-  try {
-    // const { user } = req.body;
-    const user = req.user._id;
-    const cart = await Cart.findOne({ user: user });
-    if (cart) {
-      return res
-        .status(400)
-        .json({ success: false, message: "cart is already created" });
-    }
-    const newCart = await Cart.create({
-      user: user,
-      totalItems: 0,
-      totalPrice: 0,
-    });
-    return res.status(200).json({
-      success: true,
-      message: "cart created successfully!",
-      data: newCart,
-    });
-  } catch (error) {
-    console.log("issue while creating cart =>", error.message);
-    return res
-      .status(500)
-      .json({ success: false, message: "issue while creating cart" });
-  }
-};
+// exports.createCart = async (req, res) => {
+//   try {
+//     // const { user } = req.body;
+//     const user = req.user._id;
+//     const cart = await Cart.findOne({ user: user });
+//     if (cart) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "cart is already created" });
+//     }
+//     const newCart = await Cart.create({
+//       user: user,
+//       totalItems: 0,
+//       totalPrice: 0,
+//     });
+//     return res.status(200).json({
+//       success: true,
+//       message: "cart created successfully!",
+//       data: newCart,
+//     });
+//   } catch (error) {
+//     console.log("issue while creating cart =>", error.message);
+//     return res
+//       .status(500)
+//       .json({ success: false, message: "issue while creating cart" });
+//   }
+// };
 exports.deleteCart = async (req, res) => {
   try {
     // const { user } = req.body;
@@ -67,9 +67,11 @@ exports.deleteCart = async (req, res) => {
 
 exports.addProductInTheCart = async (req, res) => {
   try {
+    console.log("req body :-", req.body);
     const user = req.user._id;
-    const { product_id, quantity } = req.body;
-    if (!product_id || !quantity > 0) {
+    const { product_id } = req.body;
+    console.log("product_id", product_id);
+    if (!product_id) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
@@ -89,32 +91,31 @@ exports.addProductInTheCart = async (req, res) => {
         message: "product not found by this product id",
       });
     }
-    if (product.quantity < quantity) {
-      return res.status(400).json({
-        success: false,
-        message: "we don't have that much stock for this product",
-      });
-    }
-    const existincart = await CartProductLink.findOne({
+    const existingcart = await CartProductLink.findOne({
       cart: cart._id,
       product: product_id,
     });
-    if (existincart) {
-      cart.totalItems -= existincart.quantity;
-      cart.totalItems += quantity;
-      cart.totalPrice -= existincart.quantity * product.price;
-      cart.totalPrice += quantity * product.price;
-      existincart.quantity = quantity;
-      await existincart.save();
+    if (existingcart) {
+      cart.totalItemCount += 1;
+      cart.totalPrice += product.price;
+      existingcart.quantity += 1;
+      await existingcart.save();
       await cart.save();
     } else {
       const cartproductlink = await CartProductLink.create({
         cart: cart._id,
         product: product_id,
-        quantity: quantity,
+        quantity: 1,
       });
-      cart.totalItems += quantity;
-      cart.totalPrice += quantity * product.price;
+      if (!cartproductlink) {
+        return res.status(400).json({
+          success: false,
+          message: "there was an issue while creating cart product link",
+        });
+      }
+      cart.totalItems += 1;
+      cart.totalItemCount += 1;
+      cart.totalPrice += product.price;
       await cart.save();
     }
     return res

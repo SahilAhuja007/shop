@@ -1,28 +1,21 @@
-import React, { useEffect } from "react";
-import axios from "axios";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useFirebase } from "../../context/firebase";
+import axios from "axios";
 
-import { useFirebase } from "../context/firebase";
-
-const UserRegister = () => {
-  const navigate = useNavigate();
+const VendorRegister = () => {
   const firebase = useFirebase();
-
-  useEffect(() => {
-    if (firebase.user) {
-      navigate("/userDashboard");
-    }
-  }, [firebase.user, navigate]);
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       await firebase.signinwithgoogle();
 
       const token = await firebase.generateToken();
-      console.log("token:", token);
+      console.log("token : ", token);
 
       const response = await axios.get(
-        "http://localhost:3000/riwaz/user/isFirstLogin",
+        "http://localhost:3000/riwaz/vendor/isFirstLogin",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -31,27 +24,25 @@ const UserRegister = () => {
       );
 
       if (response.data.isFirstLogin) {
-        navigate("/ApplicationForm", { state: { role: "user" } });
+        navigate("/ApplicationForm", { state: { role: "vendor" } });
       } else {
-        navigate("/userDashboard");
+        navigate("/vendorDashboard");
       }
     } catch (error) {
       if (error.response && error.response.status === 403) {
         alert(error.response.data.message || "Access denied.");
         navigate("/");
       } else {
-        console.error("Login error:", error);
-        alert("Something went wrong during login.");
+        console.log("Issue while vendor login =>", error);
       }
     }
   };
 
   return (
     <div style={{ justifyContent: "center", display: "flex" }}>
-      <h1>User Login</h1>
       <button onClick={handleLogin}>Sign In With Google</button>
     </div>
   );
 };
 
-export default UserRegister;
+export default VendorRegister;

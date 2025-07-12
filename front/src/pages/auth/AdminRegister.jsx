@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useFirebase } from "../context/firebase";
+import { useFirebase } from "../../context/firebase";
 import axios from "axios";
 
 const AdminRegister = () => {

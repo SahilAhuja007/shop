@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  createCart,
+  // createCart,
   deleteCart,
   addProductInTheCart,
   deleteProductFromTheCart,
@@ -9,7 +9,7 @@ const {
 const { verifyToken, authorization } = require("../../middleware/verifyToken");
 const cartRouter = express.Router();
 
-cartRouter.post("/create", verifyToken, authorization("user"), createCart);
+// cartRouter.post("/create", verifyToken, authorization("user"), createCart);
 cartRouter.delete("/delete", verifyToken, authorization("user"), deleteCart);
 cartRouter.post(
   "/addProduct",

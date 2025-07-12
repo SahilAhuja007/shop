@@ -49,8 +49,19 @@ export const FirebaseProvider = ({ children }) => {
     }
   };
 
+  const logout = async () => {
+    try {
+      await auth.signOut();
+      console.log("User successfully signed out");
+    } catch (error) {
+      console.error("Error signing out:", error.message);
+    }
+  };
+
   return (
-    <FirebaseContext.Provider value={{ signinwithgoogle, user, generateToken }}>
+    <FirebaseContext.Provider
+      value={{ signinwithgoogle, user, generateToken, logout }}
+    >
       {!loading && children}
     </FirebaseContext.Provider>
   );

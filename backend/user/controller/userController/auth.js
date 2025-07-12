@@ -1,4 +1,5 @@
 const User = require("../../models/user.model");
+const Cart = require("../../../cart/models/cart.model");
 exports.isFirstLogin = async (req, res) => {
   try {
     const user = req.user;
@@ -38,7 +39,7 @@ exports.ApplicationForm = async (req, res) => {
     console.log("user:- ", user);
     const { phone_number, role } = req.body;
     console.log("req.body", req.body);
-    if (!phone_number?.trim() || !role?.trim()) {
+    if (!phone_number || !phone_number.trim() || !role || !role.trim()) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
@@ -55,7 +56,23 @@ exports.ApplicationForm = async (req, res) => {
       $or: [{ email: user.email }, { phone: phone_number }],
     });
 
+    console.log("existinguser:- ", existinguser);
     if (existinguser) {
+      const existingcart = await Cart.findOne({ user: existinguser._id });
+      if (!existingcart) {
+        const newcart = await Cart.create({
+          user: existinguser._id,
+          totalPrice: 0,
+          totalItemCount: 0,
+          totalItems: 0,
+        });
+        if (!newcart) {
+          return res.status(400).json({
+            success: false,
+            message: "there is an issue while creating a cart by existing user",
+          });
+        }
+      }
       return res.status(400).json({
         success: false,
         message: "Account already exists. Try a different email or number.",
@@ -69,6 +86,18 @@ exports.ApplicationForm = async (req, res) => {
       phone: phone_number,
       googleId: user.uid,
     });
+
+    const newCart = await Cart.create({
+      user: new_user._id,
+      totalPrice: 0,
+      totalItems: 0,
+    });
+
+    if (!newCart) {
+      return res
+        .status(400)
+        .json({ success: false, message: "issue while creating new cart" });
+    }
 
     return res.status(200).json({
       success: true,
